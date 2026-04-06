@@ -1,0 +1,121 @@
+/* ===== Global ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: linear-gradient(135deg, #0f172a, #020617);
+    color: #e2e8f0;
+    display: flex;
+    justify-content: center;
+    padding: 40px 10px;
+}
+
+/* ===== Container ===== */
+.container {
+    width: 750px;
+}
+
+/* ===== Card Box ===== */
+.box {
+    background: rgba(30, 41, 59, 0.85);
+    backdrop-filter: blur(10px);
+    padding: 25px;
+    margin-top: 20px;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+    transition: 0.3s;
+}
+
+.box:hover {
+    transform: translateY(-2px);
+}
+
+/* ===== Headings ===== */
+h2 {
+    text-align: center;
+    margin-bottom: 15px;
+    color: #38bdf8;
+}
+
+/* ===== Inputs ===== */
+input, select {
+    width: 100%;
+    padding: 10px;
+    margin-top: 8px;
+    border-radius: 6px;
+    border: none;
+    outline: none;
+    background: #020617;
+    color: #e2e8f0;
+    border: 1px solid #334155;
+    transition: 0.2s;
+}
+
+input:focus, select:focus {
+    border-color: #38bdf8;
+    box-shadow: 0 0 5px #38bdf8;
+}
+
+/* ===== Buttons ===== */
+button {
+    margin-top: 15px;
+    padding: 10px;
+    width: 100%;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    border: none;
+    color: white;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover {
+    transform: scale(1.03);
+    box-shadow: 0 0 10px rgba(34,197,94,0.6);
+}
+
+/* ===== Jobs ===== */
+.job {
+    background: #020617;
+    padding: 12px;
+    margin-top: 12px;
+    border-radius: 8px;
+    border-left: 4px solid #38bdf8;
+    transition: 0.2s;
+}
+
+.job:hover {
+    background: #020617cc;
+}
+
+/* ===== Cancel Button ===== */
+.cancel-btn {
+    background: linear-gradient(135deg, #ef4444, #b91c1c);
+    margin-top: 8px;
+}
+
+.cancel-btn:hover {
+    box-shadow: 0 0 10px rgba(239,68,68,0.6);
+}
+
+/* ===== Scroll (if many jobs) ===== */
+#jobs {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-top: 10px;
+}
+
+/* Scrollbar */
+#jobs::-webkit-scrollbar {
+    width: 6px;
+}
+
+#jobs::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 10px;
+}

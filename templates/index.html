@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Trading Dashboard</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- 🔹 Schedule Form -->
+    <div class="box">
+        <h2>Schedule Trade</h2>
+
+        <input id="ce_strike" placeholder="CE Strike">
+        <input id="pe_strike" placeholder="PE Strike">
+        <input id="lot_size" placeholder="Lot Size">
+        <input id="expiry" placeholder="Expiry (DDMMYY)">
+
+        <select id="side">
+            <option value="sell">Sell</option>
+            <option value="buy">Buy</option>
+        </select>
+
+        <input type="date" id="date">
+        <input type="time" id="time">
+
+        <button onclick="scheduleTrade()">Schedule</button>
+    </div>
+
+
+    <!-- 🔹 Jobs List -->
+    <div class="box">
+        <h2>Scheduled Jobs</h2>
+        <button onclick="loadJobs()">Refresh Jobs</button>
+
+        <div id="jobs"></div>
+    </div>
+
+</div>
+
+
+<script>
+async function scheduleTrade() {
+    const data = {
+        ce_strike: document.getElementById("ce_strike").value,
+        pe_strike: document.getElementById("pe_strike").value,
+        lot_size: document.getElementById("lot_size").value,
+        expiry: document.getElementById("expiry").value,
+        side: document.getElementById("side").value,
+        date: document.getElementById("date").value,
+        time: document.getElementById("time").value
+    };
+
+    await fetch("/schedule", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(data)
+    });
+
+    alert("Trade Scheduled 🚀");
+    loadJobs();
+}
+
+
+async function loadJobs() {
+    const res = await fetch("/jobs");
+    const jobs = await res.json();
+
+    const container = document.getElementById("jobs");
+    container.innerHTML = "";
+
+    jobs.forEach(job => {
+        const div = document.createElement("div");
+        div.className = "job";
+
+        div.innerHTML = `
+            <p><b>ID:</b> ${job.id}</p>
+            <p><b>Run Time:</b> ${job.next_run}</p>
+            <button class="cancel-btn" onclick="cancelJob('${job.id}')">Cancel</button>
+        `;
+
+        container.appendChild(div);
+    });
+}
+
+
+async function cancelJob(jobId) {
+    await fetch(`/cancel/${jobId}`, { method: "DELETE" });
+    alert("Cancelled ❌");
+    loadJobs();
+}
+
+
+// Auto load on page open
+loadJobs();
+</script>
+
+</body>
+</html>
