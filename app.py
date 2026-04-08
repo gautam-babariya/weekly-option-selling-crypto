@@ -5,13 +5,28 @@ from scheduler import schedule_trade, get_all_jobs, cancel_job
 from mongo import connect_db, save_trade,update_status
 from risk_manager import risk_loop
 import threading
+import time
 
 app = Flask(__name__)
 
 connect_db()
+def safe_runner(func):
+    while True:
+        try:
+            print(f"🚀 Starting {func.__name__}")
+            func()
+        except Exception as e:
+            print(f"❌ Error in {func.__name__}: {e}")
+            time.sleep(5)  # 🔥 prevent CPU burn
+threading.Thread(
+    target=lambda: safe_runner(start_price_engine),
+    daemon=True
+).start()
 
-threading.Thread(target=start_price_engine, daemon=True).start()
-threading.Thread(target=risk_loop, daemon=True).start()
+threading.Thread(
+    target=lambda: safe_runner(risk_loop),
+    daemon=True
+).start()
 
 @app.route("/")
 def home():
