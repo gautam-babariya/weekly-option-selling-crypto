@@ -10,23 +10,8 @@ import time
 app = Flask(__name__)
 
 connect_db()
-def safe_runner(func):
-    while True:
-        try:
-            print(f"🚀 Starting {func.__name__}")
-            func()
-        except Exception as e:
-            print(f"❌ Error in {func.__name__}: {e}")
-            time.sleep(5)  # 🔥 prevent CPU burn
-threading.Thread(
-    target=lambda: safe_runner(start_price_engine),
-    daemon=True
-).start()
-
-threading.Thread(
-    target=lambda: safe_runner(risk_loop),
-    daemon=True
-).start()
+threading.Thread(target=start_price_engine, daemon=True).start()
+threading.Thread(target=risk_loop, daemon=True).start()
 
 @app.route("/")
 def home():
@@ -72,4 +57,6 @@ def cancel(job_id):
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=6000)
+
+    app.run(debug=False, use_reloader=False)
+    # app.run(host="0.0.0.0", port=6000)

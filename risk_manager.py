@@ -3,6 +3,8 @@ import threading
 import mongo
 import websocket_delta 
 from exit_order import execute_two_leg_trade
+from mongo import update_status
+
 
 
 # ================= SYMBOL BUILDER =================
@@ -48,6 +50,7 @@ def risk_loop():
 
             # ================= SL HIT =================
             if current_total <= sl:
+                update_status(job_id, "TARGET_HIT")
                 print("❌ SL HIT → Exiting trade")
 
                 exit_side = "buy" if t["side"] == "sell" else "sell"
@@ -64,6 +67,7 @@ def risk_loop():
 
             # ================= TARGET HIT =================
             elif current_total >= target:
+                update_status(job_id, "SL_HIT")
                 print("🎯 TARGET HIT → Exiting trade")
 
                 exit_side = "buy" if t["side"] == "sell" else "sell"
@@ -77,5 +81,6 @@ def risk_loop():
                     job_id=job_id,
                     winloss="SL_HIT"
                 )
+                
 
         time.sleep(1)  # fast loop
