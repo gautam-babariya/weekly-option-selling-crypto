@@ -112,7 +112,7 @@ def execute_two_leg_trade(ce_strike, pe_strike, lot_size, expiry, side, job_id):
 
         total_premium = ce_price + pe_price
 
-        sl = total_premium * 0.5
+        sl = total_premium * 0.4
         target = total_premium * 1.5
 
         update_sl_target(job_id, sl, target)
