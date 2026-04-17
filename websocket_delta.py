@@ -11,11 +11,21 @@ subscribed_symbols = set()
 
 ws = None  # global socket
 
+def send_ping():
+    global ws
+    while True:
+        try:
+            if ws and ws.sock and ws.sock.connected:
+                ws.send(json.dumps({"type": "ping"}))
+                # print("Ping sent")
+        except Exception as e:
+            print("Ping error:", e)
+        time.sleep(20)
 
 # ================= SYMBOL BUILDER =================
 def build_symbol(option_type, strike, expiry):
     opt = "C" if option_type.upper() == "CE" else "P"
-    return f"{opt}-BTC-{strike}-{expiry}"
+    return f"MARK:{opt}-BTC-{strike}-{expiry}"
 
 
 # ================= FETCH SYMBOLS =================
@@ -47,14 +57,15 @@ def subscribe_symbols(new_symbols):
         "payload": {
             "channels": [
                 {
-                    "name": "l1_orderbook",
+                    "name": "mark_price",
                     "symbols": list(new_symbols)
                 }
             ]
         }
     }
 
-    ws.send(json.dumps(payload))
+    if ws and ws.sock and ws.sock.connected:
+        ws.send(json.dumps(payload))
     print("📡 Subscribed:", new_symbols)
 
 def watch_new_symbols():
@@ -82,7 +93,7 @@ def watch_new_symbols():
                 subscribed_symbols.remove(sym)
                 live_prices.pop(sym, None)
 
-        time.sleep(1)
+        time.sleep(3)
         
 # ================= SOCKET EVENTS =================
 def on_open(socket):
@@ -91,25 +102,27 @@ def on_open(socket):
 
     print("✅ WebSocket connected")
 
-    # 🔥 Start watcher AFTER socket ready
     threading.Thread(target=watch_new_symbols, daemon=True).start()
+    threading.Thread(target=send_ping, daemon=True).start()  # ✅ ADD THIS
 
 
 
 def on_message(ws, message):
     data = json.loads(message)
-
-    if data.get("type") == "l1_orderbook":
+    
+    if data.get("type") == "error":
+        print("Exchange error:", data)
+        return
+    
+    if data.get("type") == "mark_price":
         symbol = data["symbol"]
 
-        bid = float(data.get("best_bid", 0))
-        ask = float(data.get("best_ask", 0))
+        ask = float(data.get("price", 0))
 
         live_prices[symbol] = {
-            "bid": bid,
+            
             "ask": ask
         }
-
         # Debug
         # print(f"{symbol} → Bid: {bid}, Ask: {ask}")
 
@@ -132,26 +145,34 @@ def unsubscribe_symbols(symbols):
         "payload": {
             "channels": [
                 {
-                    "name": "l1_orderbook",
+                    "name": "mark_price",
                     "symbols": list(symbols)
                 }
             ]
         }
     }
 
-    ws.send(json.dumps(payload))
+    if ws and ws.sock and ws.sock.connected:
+        ws.send(json.dumps(payload))
     print("🚫 Unsubscribed:", symbols)
     
 # ================= START =================
 def start_price_engine():
+    while True:
+        try:
+            print("🔄 Starting WebSocket...")
+            
+            socket = websocket.WebSocketApp(
+                WEBSOCKET_URL,
+                on_open=on_open,
+                on_message=on_message,
+                on_error=on_error,
+                on_close=on_close
+            )
 
-    # 🔹 Start WebSocket
-    socket = websocket.WebSocketApp(
-        WEBSOCKET_URL,
-        on_open=on_open,
-        on_message=on_message,
-        on_error=on_error,
-        on_close=on_close
-    )
+            socket.run_forever()
 
-    socket.run_forever()
+        except Exception as e:
+            print("Restarting due to:", e)
+
+        time.sleep(5)  # wait before reconnect

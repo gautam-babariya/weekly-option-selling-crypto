@@ -10,7 +10,7 @@ from mongo import update_status
 # ================= SYMBOL BUILDER =================
 def build_symbol(option_type, strike, expiry):
     opt = "C" if option_type.upper() == "CE" else "P"
-    return f"{opt}-BTC-{strike}-{expiry}"
+    return f"MARK:{opt}-BTC-{strike}-{expiry}"
 
 
 # ================= GET LIVE PRICE =================
